@@ -1,4 +1,4 @@
-Revision history for Perl module Mojolicious::Plugin::ClientIP::CloudFlare
+Revision history for Perl module Mojolicious::Plugin::ClientIP::Pluggable
 
 {{$NEXT}}
     - First version, released on an unsuspecting world.
