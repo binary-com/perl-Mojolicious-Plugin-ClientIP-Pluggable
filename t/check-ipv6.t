@@ -37,8 +37,8 @@ subtest "ignore rfc-7239 ipv4" => sub {
 };
 
 subtest "rfc-7239, complex" => sub {
-    my $tx = $t->ua->build_tx(GET => '/' => {'forwarded' => 'for=192.168.0.1;proto=http;by=198.51.100.17, For="[2001:db8:cafe::17]:4711"'});
-    $t->request_ok($tx)->content_is('2001:db8:cafe::17');
+    my $tx = $t->ua->build_tx(GET => '/' => {'forwarded' => 'for=192.168.0.1;proto=http;by=198.51.100.17, For="[2400:cb00:f00d::17]:4711"'});
+    $t->request_ok($tx)->content_is('2400:cb00:f00d::17');
 };
 
 done_testing;

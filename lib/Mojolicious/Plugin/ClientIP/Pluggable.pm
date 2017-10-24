@@ -84,7 +84,9 @@ sub _check_ipv4 {
 
 sub _check_ipv6 {
     my ($ip) = @_;
-    return !Data::Validate::IP::is_public_ipv4($ip);
+    return !Data::Validate::IP::is_private_ipv6($ip)
+        && !Data::Validate::IP::is_documentation_ipv6($ip)
+        && (SKIP_LOOPBACK || !Data::Validate::IP::is_loopback_ipv6($ip));
 }
 
 sub _classify_ip {
