@@ -1,4 +1,4 @@
-requires 'Data::Validate::IP';
+requires 'Data::Validate::IP', '0.25';
 requires 'Mojolicious';
 requires 'perl', '5.014';
 
