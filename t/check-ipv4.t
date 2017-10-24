@@ -6,7 +6,7 @@ use Test::Mojo;
 use Test::Warnings;
 
 # allow 127.0.0.1 be fetched in tests
-$ENV{CLIENTIP_PLUGGABLE_SKIP_LOOPBACK} = 0;
+$ENV{CLIENTIP_PLUGGABLE_ALLOW_LOOPBACK} = 0;
 {
 
     use Mojolicious::Lite;
@@ -62,9 +62,8 @@ subtest "rfc-7239, simple and valid" => sub {
 };
 
 subtest "rfc-7239, complex" => sub {
-    my $tx = $t->ua->build_tx(GET => '/' => {'forwarded' => 'for=192.168.0.1;proto=http;by=198.51.100.17, for=203.0.113.43'});
-    $t->request_ok($tx)->content_is('203.0.113.43');
+    my $tx = $t->ua->build_tx(GET => '/' => {'forwarded' => 'for=192.168.0.1;proto=http;by=198.51.100.17, for=108.61.218.131'});
+    $t->request_ok($tx)->content_is('108.61.218.131');
 };
-
 
 done_testing;
