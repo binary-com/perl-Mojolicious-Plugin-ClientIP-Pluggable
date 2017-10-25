@@ -6,7 +6,7 @@ use Test::Mojo;
 use Test::Warnings;
 
 # allow 127.0.0.1 be fetched in tests
-$ENV{CLIENTIP_PLUGGABLE_ALLOW_LOOPBACK} = 0;
+$ENV{CLIENTIP_PLUGGABLE_ALLOW_LOOPBACK} = 1;
 {
 
     use Mojolicious::Lite;

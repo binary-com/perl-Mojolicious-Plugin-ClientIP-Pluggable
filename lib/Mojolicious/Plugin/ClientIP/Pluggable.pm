@@ -2,15 +2,17 @@ package Mojolicious::Plugin::ClientIP::Pluggable;
 
 =head1 NAME
 
-Mojolicious::Plugin::ClientIP::CloudFlare - CloudFlare-aware client IP detection plugin
+Mojolicious::Plugin::ClientIP::Pluggable - Customizable way for client IP detection plugin
 
 =head1 SYNOPSIS
 
     use Mojolicious::Lite;
 
-    plugin 'ClientIP::CloudFlare', v4_only => 1;
-    # for headers analisys customization
-    # plugin 'ClientIP::CloudFlare', analyzed_headers => [qw/cf-pseudo-ipv4 cf-connecting-ip/];
+    # CloudFlare-waware settings
+    plugin 'ClientIP::Pluggable',
+        analyze_headers => [qw/cf-pseudo-ipv4 cf-connecting-ip true-client-ip/],
+        restrict_family => 'ipv4',
+        fallbacks       => [qw/rfc-7239 x-forwarded-for remote_address/]);
 
 
     get '/' => sub {
@@ -22,8 +24,14 @@ Mojolicious::Plugin::ClientIP::CloudFlare - CloudFlare-aware client IP detection
 
 =head1 DESCRIPTION
 
-Mojolicious::Plugin::ClientIP::CloudFlare is a Mojolicious plugin to get an IP address, possibly
-available beyound different CloudFlare-headers as well as X-Forwarded-For header.
+Mojolicious::Plugin::ClientIP::Pluggable is a Mojolicious plugin to get an IP address, which
+allows to specify different HTTP-headers (and their priporities) for client IP address
+extraction. This is needed as different cloud providers set different headers to disclose
+real IP address.
+
+If the address cannot be extracted from headers different fallback options are available:
+detect IP address from C<X-Forwarded-For> header, detect IP address from C<forwarded> header
+(rfc-7239), or use C<remote_address> environment.
 
 The pluging is inspired by L<Mojolicious::Plugin::ClientIP>.
 
@@ -31,30 +39,58 @@ The pluging is inspired by L<Mojolicious::Plugin::ClientIP>.
 
 =head2 client_ip
 
-Find a client IP address from different CloudFlare headers, with fallback to C<X-Forwarded-For> header,
-and then to L<Mojo::Transaction#remote_address>. If the valid IP address is not found (if you are looking
-strictly for IPv4 address, but only IPv6-address is available via headers), it returns empty string.
+Find a client IP address from the specified headers, with optional fallbacks. The address is
+validated that it is publicly available (aka routable) IP address. Empty string is returned
+if no valid address can be found.
 
 =head1 OPTIONS
 
-=head2 v4_only
-
-Only IPv4 addresses are considered valid among the possible addresses.
-
-    plugin 'ClientIP::CloudFlare', v4_only => 1;
-
-
 =head2 analyzed_headers
 
-Define order and names of CloudFlare-injected headers with client IP address.
-By default it uses C<cf-pseudo-ipv4 cf-connecting-ip true-client-ip>.
+Define order and names of cloud provider injected headers with client IP address.
+For C<cloudflare> we found the following headers are suitable:
 
-    plugin 'ClientIP::CloudFlare', analyzed_headers => [qw/cf-pseudo-ipv4 cf-connecting-ip true-client-ip/].
+    plugin 'ClientIP::Pluggable',
+        analyzed_headers => [qw/cf-pseudo-ipv4 cf-connecting-ip true-client-ip/].
 
+This option is mandatory.
 
 More details at L<https://support.cloudflare.com/hc/en-us/articles/202494830-Pseudo-IPv4-Supporting-IPv6-addresses-in-legacy-IPv4-applications>,
 L<https://support.cloudflare.com/hc/en-us/articles/200170986-How-does-CloudFlare-handle-HTTP-Request-headers>,
 L<https://support.cloudflare.com/hc/en-us/articles/206776727-What-is-True-Client-IP>
+
+=head2 restrict_family
+
+    plugin 'ClientIP::Pluggable', restrict_family => 'ipv4';
+    plugin 'ClientIP::Pluggable', restrict_family => 'ipv6';
+
+If defined only IPv4 or IPv6 addresses are considered valid among the possible addresses.
+
+By default this option is not defined, allowing IPv4 and IPv6 addresses.
+
+=head2 fallbacks
+
+    plugin 'ClientIP::Pluggable',
+        fallbacks => [qw/rfc-7239 x-forwarded-for remote_address/]);
+
+Try to get valid client IP-address from fallback sources, if we fail to do that from
+cloud-provider headers.
+
+C<rfc-7239> uses C<forwarded> header, C<x-forwarded-for> use <x-forwarded-for> header
+(appeared before rfc-7239 and still widely used) or use remote_address environment
+(C<$c->tx->remote_address>).
+
+Default value is C<[remote_address]>.
+
+=head1 ENVIRONMENT
+
+=head2 CLIENTIP_PLUGGABLE_ALLOW_LOOPBACK
+
+Allows non-routable loopback address (C<127.0.0.1>) to pass validation. Use it for
+test purposes.
+
+Default value is C<0>, i.e. loopback addresses do not pass IP-address validation.
+
 
 =head1 COPYRIGHT AND LICENSE
 
@@ -73,7 +109,7 @@ use Mojo::Base 'Mojolicious::Plugin';
 our $VERSION = '0.01';
 
 # for tests only
-use constant ALLOW_LOOPBACK => $ENV{CLIENTIP_PLUGGABLE_ALLOW_LOOPBACK} || 1;
+use constant ALLOW_LOOPBACK => $ENV{CLIENTIP_PLUGGABLE_ALLOW_LOOPBACK} || 0;
 
 sub _check_ipv4 {
     my ($ip) = @_;
