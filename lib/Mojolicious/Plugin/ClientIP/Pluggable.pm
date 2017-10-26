@@ -132,7 +132,7 @@ sub _classify_ip {
         : undef;
 }
 
-sub _candatetes_iterator {
+sub _candidates_iterator {
     my ($c, $analyzed_headers, $fallback_options) = @_;
     my $headers = $c->tx->req->headers;
     my @candidates = map { $headers->header($_) // () } @$analyzed_headers;
@@ -187,7 +187,7 @@ sub register {
     $app->helper(client_ip => sub {
         my ($c) = @_;
 
-        my $next_candidate = _candatetes_iterator($c, $analyzed_headers, $fallback_options);
+        my $next_candidate = _candidates_iterator($c, $analyzed_headers, $fallback_options);
         while(my $ip = $next_candidate->()) {
             # generic check
             next unless Data::Validate::IP::is_ip($ip);
