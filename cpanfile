@@ -9,4 +9,5 @@ on configure => sub {
 on build => sub {
     requires 'Test::Mojo';
     requires 'Test::More';
+    requires 'Test::Warnings';
 };
