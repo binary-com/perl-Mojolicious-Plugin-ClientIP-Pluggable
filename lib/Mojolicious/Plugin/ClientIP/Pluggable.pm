@@ -14,7 +14,7 @@ Mojolicious::Plugin::ClientIP::Pluggable - Customizable client IP detection plug
     plugin 'ClientIP::Pluggable',
         analyze_headers => [qw/cf-pseudo-ipv4 cf-connecting-ip true-client-ip/],
         restrict_family => 'ipv4',
-        fallbacks       => [qw/rfc-7239 x-forwarded-for remote_address/]);
+        fallbacks       => [qw/rfc-7239 x-forwarded-for remote_address/];
 
 
     get '/' => sub {
