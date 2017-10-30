@@ -1,8 +1,10 @@
 package Mojolicious::Plugin::ClientIP::Pluggable;
 
+# ABSTRACT: Client IP header handling for Mojolicious requests
+
 =head1 NAME
 
-Mojolicious::Plugin::ClientIP::Pluggable - Customizable way for client IP detection plugin
+Mojolicious::Plugin::ClientIP::Pluggable - Customizable client IP detection plugin for Mojolicious
 
 =head1 SYNOPSIS
 
@@ -25,7 +27,7 @@ Mojolicious::Plugin::ClientIP::Pluggable - Customizable way for client IP detect
 =head1 DESCRIPTION
 
 Mojolicious::Plugin::ClientIP::Pluggable is a Mojolicious plugin to get an IP address, which
-allows to specify different HTTP-headers (and their priporities) for client IP address
+allows to specify different HTTP-headers (and their priorities) for client IP address
 extraction. This is needed as different cloud providers set different headers to disclose
 real IP address.
 
@@ -33,7 +35,7 @@ If the address cannot be extracted from headers different fallback options are a
 detect IP address from C<X-Forwarded-For> header, detect IP address from C<forwarded> header
 (rfc-7239), or use C<remote_address> environment.
 
-The pluging is inspired by L<Mojolicious::Plugin::ClientIP>.
+The plugin is inspired by L<Mojolicious::Plugin::ClientIP>.
 
 =head1 METHODS
 
@@ -203,7 +205,7 @@ sub register {
             my $validator = $validator_for{$address_family};
             next unless $validator->($ip);
 
-            # address seems valid, return it's textual representation
+            # address seems valid, return its textual representation
             return $ip;
         }
         return '';
